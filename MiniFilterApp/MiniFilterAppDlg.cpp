@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CMiniFilterAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON3, &CMiniFilterAppDlg::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_BUTTON4, &CMiniFilterAppDlg::OnBnClickedButton4)
 	ON_BN_CLICKED(IDC_BUTTON5, &CMiniFilterAppDlg::OnBnClickedButton5)
+	ON_BN_CLICKED(IDC_BUTTON6, &CMiniFilterAppDlg::OnBnClickedButton6)
 END_MESSAGE_MAP()
 
 
@@ -160,6 +161,7 @@ HCURSOR CMiniFilterAppDlg::OnQueryDragIcon()
 BOOL(*ReadMem)(HANDLE ProcessId, SIZE_T ReadSize, PVOID ReadAddr, LPVOID Buffer);
 BOOL(*WriteMem)(HANDLE ProcessId, SIZE_T WriteSize, PVOID WriteAddr, LPVOID Buffer);
 PVOID64(*GetModuleEx)(DWORD ProcessId, wchar_t *ModuleName);
+BOOL(*MandatoryDeleteFile)(WCHAR* FilePath);
 HMODULE Module = NULL;
 void CMiniFilterAppDlg::OnBnClickedButton1()	//Load
 {
@@ -172,6 +174,8 @@ void CMiniFilterAppDlg::OnBnClickedButton1()	//Load
 	ReadMem = (BOOL(*)(HANDLE, SIZE_T, PVOID, LPVOID))GetProcAddress(Module, "ReadMem");
 	WriteMem = (BOOL(*)(HANDLE, SIZE_T, PVOID, LPVOID))GetProcAddress(Module, "WriteMem");
 	GetModuleEx = (PVOID64(*)(DWORD, wchar_t*))GetProcAddress(Module, "GetModuleEx");
+	MandatoryDeleteFile = (BOOL(*)(WCHAR* ))GetProcAddress(Module, "MandatoryDeleteFile");
+	
 }
 
 
@@ -215,4 +219,13 @@ void CMiniFilterAppDlg::OnBnClickedButton5()	//Write
 	// TODO: 在此添加控件通知处理程序代码
 	DWORD TEMP;
 	WriteMem((HANDLE)1, 4, (PVOID)4, (PVOID)&TEMP);
+}
+
+
+void CMiniFilterAppDlg::OnBnClickedButton6()	//FileDelete
+{
+	// TODO: 在此添加控件通知处理程序代码
+	WCHAR Path[0x100];
+	GetModuleFileName(NULL, Path, 0x100);
+	MandatoryDeleteFile(Path);
 }

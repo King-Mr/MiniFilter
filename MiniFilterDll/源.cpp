@@ -21,7 +21,8 @@ enum ControlCode
 	ReadMemory,
 	WriteMemory,
 	GetModuleBase,
-	ProtectProcess
+	ProtectProcess,
+	FileDelete
 };
 typedef struct _ReadInfo
 {
@@ -30,6 +31,7 @@ typedef struct _ReadInfo
 	_HANDLE ProcessId;
 	VOID64 RwAddr;
 	WCHAR ModuleName[20];
+	WCHAR DeleteFilePath[0x100];
 }ReadInfo, *lpReadInfo;
 
 
@@ -51,6 +53,26 @@ bool ConnectMiniPort()
 bool DisConnectMiniPort()
 {
 	CloseHandle(MiniPort);
+}
+extern "C" _declspec(dllexport) BOOL MandatoryDeleteFile(WCHAR* FilePath)
+{
+	bool State;
+	ReadInfo Info;
+	DWORD dw;
+	DWORD RetSize;
+	ZeroMemory(&Info, sizeof(Info));
+	if (MiniPort == NULL)
+	{
+		return FALSE;
+	}
+	Info.Code = FileDelete;
+	wcscat(Info.DeleteFilePath, FilePath);
+	DWORD Status = FilterSendMessage(MiniPort, &Info, sizeof(ReadInfo), NULL, NULL, &RetSize);
+	if (SUCCEEDED(Status))
+	{
+		return true;
+	}
+	return false;
 }
 extern "C" _declspec(dllexport) BOOL ReadMem(HANDLE ProcessId, SIZE_T ReadSize, PVOID ReadAddr, LPVOID Buffer)
 {
